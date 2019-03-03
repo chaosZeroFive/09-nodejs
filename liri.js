@@ -98,7 +98,7 @@ function showConcert(){
 
 function showSong(song){
     if (!opt){
-        song = "The Sign";
+        song = "The Sign Ace of Bass";
     }
     else {
         song = opt.trim();
@@ -115,7 +115,6 @@ function showSong(song){
                 var a = JSON.stringify(obj[i].album.artists);
                 var a_obj = JSON.parse(a);
                 var artists = a_obj.map(a_obj => a_obj.name);
-
                 log(`
                 ${chalk.yellow.bold("Song: " + item)}
                 ${chalk.yellow("================================================================================================================================")}
@@ -138,13 +137,13 @@ function showSong(song){
 //default is mr.nobody
 
 function showMovie(){
+    var movie = opt;
     if (!opt) {
         log(`
-        ${chalk.yellow("=====================================================")}
-           ${chalk.red.underline("You didn't provide a movie name")}
+
+           ${chalk.yellow("You didn't provide a movie name")}
 
            ${chalk.yellow("May I suggest Mr. Nobody")}
-        ${chalk.yellow("=====================================================")}
         `);
         opt = "Mr Nobody"; //default movie that is returned
     }
@@ -155,9 +154,22 @@ function showMovie(){
 
         request(queryUrl, function(err, response, body){
             var data = JSON.parse(body);
+            log(`
+            ${chalk.yellow("==========================================================================================================")}
+            ${chalk.yellow("Title: ") + data.Title}
+            ${chalk.yellow("Released: ") + data.Year}
+            ${chalk.yellow("IMDB Rating: ") + data.imdbRating}
+            ${chalk.yellow("Rotten Tomatos Rating: ") + data.rottenTomatos}
+            ${chalk.yellow("Country Produced: ") + data.Country}
+            ${chalk.yellow("Language: ") + data.Language}
+            ${chalk.yellow("Plot: ") + data.Plot}
+            ${chalk.yellow("Actors: ") + data.Actors}
+            ${chalk.yellow("==========================================================================================================")}
+            `);
         });
     }
 }
+
 //use command do-what-it-says
 //read the text from random.txt and return a band, song, or movie the same as above
 function showInfo(){
@@ -169,7 +181,16 @@ function showInfo(){
         ${chalk.yellow("=====================================================")}
         `);
     }
+    else {
+        writeResults()
+        log(`
+        ${chalk.yellow("=====================================================")}
+            ${chalk.red.underline("I wrote the results to file")}
+        ${chalk.yellow("=====================================================")}
+        `);
+    }
 }
+
 //output a txt file with the returned data
 //check if a file exists...and name it in sequence
 

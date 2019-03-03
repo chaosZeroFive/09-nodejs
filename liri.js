@@ -1,16 +1,25 @@
 require("dotenv").config();
 
-var fs = require("fs");
-var keys = require("./keys.js");
-var spotify = require("node-spotify-api");
-var moment = require("moment");
-var request = require("request");
-var chalk = require("chalk");
+const fs = require("fs");
+const keys = require("./keys.js");
+const moment = require("moment");
+const request = require("request");
+const chalk = require("chalk");
+const log = console.log;
+
+var Spotify = require("node-spotify-api");
 var command = process.argv[2]; //first cl input 
 var opt = process.argv[3]; //second cl input
-var spotifyKey = new Spotify(keys.spotify);
-var omdbKey = new omdbKey(keys.omdb);
-var log = console.log;
+
+
+const spotifyKey = new Spotify({
+    id: keys.spotify.id,
+    secret: keys.spotify.secret
+});
+
+const omdbKey = new OMDB({
+    apikey: keys.omdb.apikey
+});
 
     switch (command){
         case "concert-this":
@@ -33,7 +42,7 @@ var log = console.log;
         help();
         break;
     }
-
+//returned if no command is passed
 function help(){
     log(`
     ${chalk.yellow("=====================================================")}
@@ -60,7 +69,7 @@ function showConcert(){
     }
     else {
         let artist = opt.trim();
-    }
+        log(artist);
     let queryUrl = "https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp";
 
     request(queryUrl, function(error, response, body){
@@ -71,19 +80,19 @@ function showConcert(){
             };
             let data = JSON.parse(body);
             for (let i = 0; i < 3; i++){
+                //log(data[i]);
                 log(`
                 ${chalk.blue("=====================================================")}
                 ${chalk.blue("#" + (i+1))}
-                ${chalk.blue("Artist:          ") + data[i].}
                 ${chalk.blue.bold("Venue:      ") + data[i].venue.name}
                 ${chalk.blue.bold("Location:   ") + data[i].venue.city + ", " + data[i].venue.region + " " + data[i].venue.country}
                 ${chalk.blue.bold("Date:       ") + data[i].venue.datetime}
-                ${chalk.blue()}
                 ${chalk.blue("=====================================================")}
                 `);
             }
         }
-    })
+    });
+}
 }
 //use command spotify-this-song
 //get the artist, song name, preview link and album song is from
@@ -104,6 +113,7 @@ function showMovie(){
         log(`
         ${chalk.yellow("=====================================================")}
            ${chalk.red.underline("You didn't provide a movie name")}
+
            ${chalk.yellow("May I suggest Mr. Nobody")}
         ${chalk.yellow("=====================================================")}
         `);
@@ -111,6 +121,12 @@ function showMovie(){
     }
     else {
         let movie = opt.trim();
+
+        let queryUrl = "http://www.omdbapi.com/?&t=" + movie +  "&apikey=" + omdbKey;
+
+        request(queryUrl, function(err, response, body){
+            let data = JSON.parse(body);
+        });
     }
 }
 //use command do-what-it-says
@@ -131,5 +147,5 @@ function showInfo(){
 function writeResults(){
     fs.writeFile("search-results.txt", resultData, function(err){
         if (err) return console.log(err);
-    } )
+    } );
 }

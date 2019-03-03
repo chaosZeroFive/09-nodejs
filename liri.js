@@ -1,25 +1,23 @@
 require("dotenv").config();
-
-const fs = require("fs");
-const keys = require("./keys.js");
-const moment = require("moment");
-const request = require("request");
-const chalk = require("chalk");
-const log = console.log;
-
+var fs = require("fs");
+var keys = require("./keys.js");
+var moment = require("moment");
+var request = require("request");
+var chalk = require("chalk");
+var log = console.log;
 var Spotify = require("node-spotify-api");
 var command = process.argv[2]; //first cl input 
 var opt = process.argv[3]; //second cl input
+var spotify = new Spotify(keys.spotify);
 
+// var spotifyKey = new Spotify({
+//     id: keys.spotify.id,
+//     secret: keys.spotify.secret
+// });
 
-const spotifyKey = new Spotify({
-    id: keys.spotify.id,
-    secret: keys.spotify.secret
-});
-
-const omdbKey = new OMDB({
-    apikey: keys.omdb.apikey
-});
+//const omdbKey = new OMDB({
+//    apikey: keys.omdb.apikey
+//});
 
     switch (command){
         case "concert-this":
@@ -68,9 +66,9 @@ function showConcert(){
         return;
     }
     else {
-        let artist = opt.trim();
+        var artist = opt.trim();
         log(artist);
-    let queryUrl = "https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp";
+    var queryUrl = "https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp";
 
     request(queryUrl, function(error, response, body){
         if (error) return log(error);
@@ -78,16 +76,16 @@ function showConcert(){
             if (body.length < 20){
                 return log("No Results Found");
             };
-            let data = JSON.parse(body);
+            var data = JSON.parse(body);
             for (let i = 0; i < 3; i++){
                 //log(data[i]);
                 log(`
-                ${chalk.blue("=====================================================")}
-                ${chalk.blue("#" + (i+1))}
+            ${chalk.blue("=====================================================")}
+            ${chalk.blue("#" + (i+1))}
                 ${chalk.blue.bold("Venue:      ") + data[i].venue.name}
                 ${chalk.blue.bold("Location:   ") + data[i].venue.city + ", " + data[i].venue.region + " " + data[i].venue.country}
-                ${chalk.blue.bold("Date:       ") + data[i].venue.datetime}
-                ${chalk.blue("=====================================================")}
+                ${chalk.blue.bold("Date:       ") + moment(data[i].datetime).format("DD MMMM YYYY h:mm")}
+            ${chalk.blue("=====================================================")}
                 `);
             }
         }
@@ -97,17 +95,48 @@ function showConcert(){
 //use command spotify-this-song
 //get the artist, song name, preview link and album song is from
 //default return is thw sign by ace of base
-function showSong(){
+
+function showSong(song){
     if (!opt){
-        opt = "The Sign";  //default song that is returned
+        song = "The Sign";
     }
     else {
-        let song = opt.trim();
+        song = opt.trim();
     }
-}
+        spotify.search({
+            type: 'track',
+            query: song,
+            limit: 5
+        }).then(function(response){
+            var obj = response.tracks.items;
+            var item = 0;
+            for (var i = 0; i < obj.length; i++){
+                item++;
+                var a = JSON.stringify(obj[i].album.artists);
+                var a_obj = JSON.parse(a);
+                var artists = a_obj.map(a_obj => a_obj.name);
+
+                log(`
+                ${chalk.yellow.bold("Song: " + item)}
+                ${chalk.yellow("================================================================================================================================")}
+
+                    ${chalk.yellow.bold("Artist(s):   ") + chalk.whiteBright(artists)}
+                    ${chalk.yellow.bold("Song Name:   ") + chalk.whiteBright(obj[i].name)}
+                    ${chalk.yellow.bold("Album:       ") + chalk.whiteBright(obj[i].album.name)}
+                    ${chalk.yellow.bold("Preview:     ") + chalk.underline.whiteBright(obj[i].preview_url)}
+                
+                ${chalk.yellow("================================================================================================================================")}
+                `);
+            }
+             
+        }).catch(function(err){
+            log(err);
+        });
+    }
 //use command movie-this using movie name
 //get the title, year, IMDB rating, rotton tomatoes rating, language, plot, and actors
 //default is mr.nobody
+
 function showMovie(){
     if (!opt) {
         log(`
@@ -120,12 +149,12 @@ function showMovie(){
         opt = "Mr Nobody"; //default movie that is returned
     }
     else {
-        let movie = opt.trim();
+        var movie = opt.trim();
 
-        let queryUrl = "http://www.omdbapi.com/?&t=" + movie +  "&apikey=" + omdbKey;
+        var queryUrl = "http://www.omdbapi.com/?&t=" + movie +  "&apikey=48a30628";
 
         request(queryUrl, function(err, response, body){
-            let data = JSON.parse(body);
+            var data = JSON.parse(body);
         });
     }
 }

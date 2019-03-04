@@ -3,21 +3,13 @@ var fs = require("fs");
 var keys = require("./keys.js");
 var moment = require("moment");
 var request = require("request");
+var axios = require("axios");
 var chalk = require("chalk");
 var log = console.log;
 var Spotify = require("node-spotify-api");
 var command = process.argv[2]; //first cl input 
 var opt = process.argv[3]; //second cl input
 var spotify = new Spotify(keys.spotify);
-
-// var spotifyKey = new Spotify({
-//     id: keys.spotify.id,
-//     secret: keys.spotify.secret
-// });
-
-//const omdbKey = new OMDB({
-//    apikey: keys.omdb.apikey
-//});
 
     switch (command){
         case "concert-this":
@@ -33,7 +25,7 @@ var spotify = new Spotify(keys.spotify);
         break;
 
         case "do-what-it-says":
-        showInfo(opt);
+        doThis(opt);
         break;
 
         default:  //calls help function
@@ -127,7 +119,6 @@ function showSong(song){
                 ${chalk.yellow("================================================================================================================================")}
                 `);
             }
-             
         }).catch(function(err){
             log(err);
         });
@@ -136,66 +127,52 @@ function showSong(song){
 //get the title, year, IMDB rating, rotton tomatoes rating, language, plot, and actors
 //default is mr.nobody
 
-function showMovie(){
-    var movie = opt;
+function showMovie(opt) {
+    var firstLine;
+    var secondLine;
     if (!opt) {
-        log(`
-
-           ${chalk.yellow("You didn't provide a movie name")}
-
-           ${chalk.yellow("May I suggest Mr. Nobody")}
-        `);
         opt = "Mr Nobody"; //default movie that is returned
+        log(`
+            ${chalk.yellow("You didn't provide a movie name")}
+            ${chalk.yellow("May I suggest Mr. Nobody")}
+        `);
     }
-    else {
-        var movie = opt.trim();
-
-        var queryUrl = "http://www.omdbapi.com/?&t=" + movie +  "&apikey=48a30628";
-
-        request(queryUrl, function(err, response, body){
-            var data = JSON.parse(body);
+    axios.get("http://www.omdbapi.com/?t=" + opt.trim() + "&plot=short&apikey=trilogy")
+        .then(function (response) {
             log(`
             ${chalk.yellow("==========================================================================================================")}
-            ${chalk.yellow("Title: ") + data.Title}
-            ${chalk.yellow("Released: ") + data.Year}
-            ${chalk.yellow("IMDB Rating: ") + data.imdbRating}
-            ${chalk.yellow("Rotten Tomatos Rating: ") + data.rottenTomatos}
-            ${chalk.yellow("Country Produced: ") + data.Country}
-            ${chalk.yellow("Language: ") + data.Language}
-            ${chalk.yellow("Plot: ") + data.Plot}
-            ${chalk.yellow("Actors: ") + data.Actors}
+            ${chalk.yellow("Title: ") + response.data.Title}
+            ${chalk.yellow("Released: ") + response.data.Year}
+            ${chalk.yellow("IMDB Rating: ") + response.data.imdbRating}
+            ${chalk.yellow("Rotten Tomatos Rating: ") + response.data.rottenTomatos}
+            ${chalk.yellow("Country Produced: ") + response.data.Country}
+            ${chalk.yellow("Language: ") + response.data.Language}
+            ${chalk.yellow("Plot: ") + response.data.Plot}
+            ${chalk.yellow("Actors: ") + response.data.Actors}
             ${chalk.yellow("==========================================================================================================")}
             `);
+        })
+        .catch(function (error) {
+            log(error);
         });
-    }
 }
 
 //use command do-what-it-says
 //read the text from random.txt and return a band, song, or movie the same as above
-function showInfo(){
-    //var queryUrl = "";
-    if (!opt) {
-        log(`
-        ${chalk.yellow("=====================================================")}
-            ${chalk.red.underline("The source file doesn't have anything to search for")}
-        ${chalk.yellow("=====================================================")}
-        `);
-    }
-    else {
-        writeResults()
-        log(`
-        ${chalk.yellow("=====================================================")}
-            ${chalk.red.underline("I wrote the results to file")}
-        ${chalk.yellow("=====================================================")}
-        `);
-    }
+function doThis(opt) {
+    fs.readFile("random.txt", "utf8", function (error, data) {
+        if (error) {
+            log(error);
+            log("Nothing was Found that I could do");
+        } else {
+            var text = data.split(",");
+            command = text[0];
+            opt = text[1];
+            log(command);
+            log(opt);
+        }
+    });
 }
 
 //output a txt file with the returned data
 //check if a file exists...and name it in sequence
-
-function writeResults(){
-    fs.writeFile("search-results.txt", resultData, function(err){
-        if (err) return console.log(err);
-    } );
-}

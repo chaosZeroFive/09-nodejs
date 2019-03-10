@@ -2,7 +2,7 @@ require("dotenv").config();
 var fs = require("fs");
 var keys = require("./keys.js");
 var moment = require("moment");
-var request = require("request");
+var lineReader = require("line-reader");
 var axios = require("axios");
 var chalk = require("chalk");
 var log = console.log;
@@ -13,6 +13,7 @@ var spotify = new Spotify(keys.spotify);
 var appRun = false;
 var runCount = 0;
 var gotObject;
+const hr = "=========================================================";
 
     switch (command){
         case "concert-this":
@@ -75,29 +76,28 @@ function showConcert(){
     var queryUrl = "https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp";
         appRun = true;
         runCount++;
-    request(queryUrl, function(error, response, body){
-        if (error) return log(error);
-        if (!error && response.statusCode === 200){
-            if (body.length < 20){
-                return log("No Results Found");
-            };
-            var data = JSON.parse(body);
-            for (let i = 0; i < 3; i++){
-                gotObject = "\n=========================================================" + "\nVenue: " + data[i].venue.name + "\nLocation: " + data[i].venue.city + ", " + data[i].venue.region + " " + data[i].venue.country + "\nDate: " + moment(data[i].datetime).format("DD MMMM YYYY h:mm") + "\n=========================================================\n";
-                appendRandom();
-                log(`
-            ${chalk.yellow.bold("=====================================================")}
-            ${chalk.yellow.bold("#" + (i+1))}
-                ${chalk.yellow.bold("Venue:      ") + data[i].venue.name}
-                ${chalk.yellow.bold("Location:   ") + data[i].venue.city + ", " + data[i].venue.region + " " + data[i].venue.country}
-                ${chalk.yellow.bold("Date:       ") + moment(data[i].datetime).format("DD MMMM YYYY h:mm")}
-            ${chalk.yellow.bold("=====================================================")}
-                `);
-            }
-        }
-    });
+        axios.get(queryUrl)
+            .then(function (response) {
+                for (var i = 0; i < response.data.length; i++) {
+                    let name = response.data[i].venue.name;
+                    let loc = response.data[i].venue.city + ", " + response.data[i].venue.region + " " + response.data[i].venue.country;
+                    let dateT = moment(response.data[i].datetime).format("DD MMMM YYYY h:mm");
+log(`
+${chalk.yellow.bold(hr)}
+${chalk.yellow.bold("#" + (i + 1))}
+${chalk.yellow.bold("Venue: ") + name}
+${chalk.yellow.bold("Location: ") + loc}
+${chalk.yellow.bold("Date: ") + dateT}
+${chalk.yellow.bold(hr)}
+`);
+                }
+            })
+            .catch(function (error) {
+                log(error);
+            });
+    }
 }
-}
+    
 //use command spotify-this-song
 //get the artist, song name, preview link and album song is from
 //default return is thw sign by ace of base
@@ -123,19 +123,15 @@ function showSong(song){
                 var a = JSON.stringify(obj[i].album.artists);
                 var a_obj = JSON.parse(a);
                 var artists = a_obj.map(a_obj => a_obj.name);
-                appendRandom();
-                gotObject = "\n=========================================================" + "\nArtist: " + artists + "\nSong Name: " + obj[i].name + "\nAlbum: " + obj[i].album.name + "\nPreview: " + obj[i].preview_url + "\n=========================================================\n";
-                log(`
-                ${chalk.yellow.bold("Song: " + item)}
-                ${chalk.yellow("=========================================================")}
-
-                    ${chalk.yellow.bold("Artist(s):   ") + chalk.whiteBright(artists)}
-                    ${chalk.yellow.bold("Song Name:   ") + chalk.whiteBright(obj[i].name)}
-                    ${chalk.yellow.bold("Album:       ") + chalk.whiteBright(obj[i].album.name)}
-                    ${chalk.yellow.bold("Preview:     ") + chalk.whiteBright(obj[i].preview_url)}
-                
-                ${chalk.yellow("=========================================================")}
-                `);
+log(`
+${chalk.yellow.bold("Song: " + item)}
+${chalk.yellow(hr)}
+${chalk.yellow.bold("Artist(s):   ") + chalk.whiteBright(artists)}
+${chalk.yellow.bold("Song Name:   ") + chalk.whiteBright(obj[i].name)}
+${chalk.yellow.bold("Album:       ") + chalk.whiteBright(obj[i].album.name)}
+${chalk.yellow.bold("Preview:     ") + chalk.whiteBright(obj[i].preview_url)}
+${chalk.yellow(hr)}
+`);
             }
         }).catch(function(err){
             log(err);
@@ -146,33 +142,29 @@ function showSong(song){
 //default is mr.nobody
 
 function showMovie() {
-    var firstLine;
-    var secondLine;
     if (!opt) {
         opt = "Mr Nobody"; //default movie that is returned
-        log(`
-            ${chalk.yellow("You didn't provide a movie name")}
-            ${chalk.yellow("May I suggest Mr. Nobody")}
-        `);
+log(`
+    ${chalk.yellow("You didn't provide a movie name")}
+    ${chalk.yellow("May I suggest Mr. Nobody")}
+`);
     }
     appRun = true;
     runCount++;
     axios.get("http://www.omdbapi.com/?t=" + opt.trim() + "&plot=short&apikey=trilogy")
         .then(function (response) {
-            gotObject = "\n=========================================================" + "\nTitle: " + response.data.Title + "\nYear: " + response.data.Year + "\nIMDB Rating: " + response.data.imdbRating + "\nRotten Tomatos Rating: " + response.data.rottenTomatos + "\nCountry Produced: " + "\nLanguage: " + response.data.Language + "\nPlot: " + response.data.Plot + "\nActors: " + response.data.Actors + "\n=========================================================\n";
-            appendRandom();
-            log(`
-            ${chalk.yellow("=========================================================")}
-            ${chalk.yellow("Title: ") + response.data.Title}
-            ${chalk.yellow("Released: ") + response.data.Year}
-            ${chalk.yellow("IMDB Rating: ") + response.data.imdbRating}
-            ${chalk.yellow("Rotten Tomatos Rating: ") + response.data.rottenTomatos}
-            ${chalk.yellow("Country Produced: ") + response.data.Country}
-            ${chalk.yellow("Language: ") + response.data.Language}
-            ${chalk.yellow("Plot: ") + response.data.Plot}
-            ${chalk.yellow("Actors: ") + response.data.Actors}
-            ${chalk.yellow("=========================================================")}
-            `);
+log(`
+${chalk.yellow(hr)}
+${chalk.yellow("Title: ") + response.data.Title}
+${chalk.yellow("Released: ") + response.data.Year}
+${chalk.yellow("IMDB Rating: ") + response.data.imdbRating}
+${chalk.yellow("Rotten Tomatos Rating: ") + response.data.rottenTomatos}
+${chalk.yellow("Country Produced: ") + response.data.Country}
+${chalk.yellow("Language: ") + response.data.Language}
+${chalk.yellow("Plot: ") + response.data.Plot}
+${chalk.yellow("Actors: ") + response.data.Actors}
+${chalk.yellow(hr)}
+`);
         })
         .catch(function (error) {
             log(error);
@@ -183,29 +175,8 @@ function showMovie() {
 //read the text from random.txt and return a band, song, or movie the same as above
 function doThis() {
     fs.readFile("random.txt", "utf8", function (error, data) {
-        appRun = true;
-        runCount++;
         var text = data.split(",");
-        command = text[0];
-        opt = text[1];
-        log(command);
-        log(opt);
-        switch(command) {
-            case "concert-this":
-            showConcert(opt);
-            break;
-
-            case "spotify-this-song":
-            showSong(opt);
-            break;
-
-            case "movie-this":
-            showMovie(opt);
-            break;
-            
-            default: //calls help function
-            help();
-            break;
+        
         }
     });
 }

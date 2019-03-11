@@ -42,21 +42,21 @@ const hr = "=========================================================";
     }
 //returned if no command is passed
 function help(){
-    log(`
-    ${chalk.yellow("=====================================================")}
+log(`
+${chalk.yellow(hr)}
 
-    ${chalk.yellow("USAGE:  node liri.js <COMMAND> [parameter]")}
+${chalk.yellow("USAGE:  node liri.js <COMMAND> [parameter]")}
 
-    ${chalk.yellow("Available Commands:")}
-        ${chalk.yellow("concert-this [parameter]")}
-        ${chalk.yellow("spotify-this-song [parameter]")}
-        ${chalk.yellow("movie-this [parameter]")}
+${chalk.yellow("Available Commands:")}
+    ${chalk.yellow("concert-this [parameter]")}
+    ${chalk.yellow("spotify-this-song [parameter]")}
+    ${chalk.yellow("movie-this [parameter]")}
 
-        ${chalk.yellow("ALTERNATE USAGE:  node liri.js ") + chalk.yellow.underline("do-what-it-says") + chalk.yellow(" [NO PARAMETER]")}
-        ${chalk.yellow("Reads command and parameter from random.txt")}
+    ${chalk.yellow("ALTERNATE USAGE:  node liri.js ") + chalk.yellow.underline("do-what-it-says") + chalk.yellow(" [NO PARAMETER]")}
+    ${chalk.yellow("Reads command and parameter from random.txt")}
 
-    ${chalk.yellow("=====================================================")}
-    `);
+${chalk.yellow(hr)}
+`);
 }
 
 //use command concert-this
@@ -177,7 +177,6 @@ function doThis() {
     fs.readFile("random.txt", "utf8", function (error, data) {
         var text = data.split(",");
         
-        }
     });
 }
 

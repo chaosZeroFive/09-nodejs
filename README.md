@@ -44,15 +44,15 @@ Type help to see available options
 
 ### Search for Concerts
 
-![CONCERT-THIS](https://github.com/chaosZeroFive/09-nodejs/blob/master/demo/gif/concert-this.gif)
+![CONCERT-THIS](https://github.com/chaosZeroFive/09-nodejs/blob/master/demo/concert-this.gif)
 
 ### Search for a Song
 
-![SPOTIFY](https://github.com/chaosZeroFive/09-nodejs/blob/master/demo/gif/spotify-this-song.gif)
+![SPOTIFY](https://github.com/chaosZeroFive/09-nodejs/blob/master/demo/spotify-this.gif)
 
 ### Search for a Movie
 
-![OMDB](https://github.com/chaosZeroFive/09-nodejs/blob/master/demo/gif/movie-this.gif)
+![OMDB](https://github.com/chaosZeroFive/09-nodejs/blob/master/demo/movie-this.gif)
 
 ### Search from Text file
 
